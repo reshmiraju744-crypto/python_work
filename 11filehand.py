@@ -5,7 +5,7 @@ def add_employee():
         name = input("Enter employee name:")
         if re.match(r'^[a-zA-Z\s\']{2,20}$', name):
             break
-        print("invalid .Please enter a valid name")
+        print("invalid .Please enter a valid name  ")
     while True:
         emp_id=input("enter the employee id:")
         if re.match(r'^\d{4,6}$',emp_id):
