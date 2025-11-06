@@ -1,5 +1,5 @@
 import mysql.connector
-
+# from django.contrib.auth import logout
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -412,7 +412,7 @@ def login():
         cursor.execute("SELECT * FROM login WHERE email=%s", (email,))
         existing = cursor.fetchone()
         if existing:
-            cursor.execute("update login set status=1 where status =0")
+            cursor.execute("update login set status=1 where email=%s", (email,))
         else:
             sql = "INSERT INTO login (email, password, role, status) VALUES (%s, %s, %s, %s)"
             val = (email, password, 'principal', '1')
@@ -430,7 +430,7 @@ def login():
             cursor.execute("SELECT * FROM login WHERE email=%s", (email,))
             existing = cursor.fetchone()
             if existing:
-                cursor.execute("update login set status=1 where status =0")
+                cursor.execute("update login set status=1 where email=%s", (email,))
             else :
                 sql="insert into login(email,password,role,status)values(%s,%s,%s,%s) "
                 val=(email,password,'Staff','1')
@@ -450,7 +450,7 @@ def login():
                 cursor.execute("SELECT * FROM login WHERE email=%s", (email,))
                 existing = cursor.fetchone()
                 if existing:
-                    cursor.execute("update login set status=1 where status =0")
+                    cursor.execute("update login set status=1 where email=%s", (email,))
                 else:
                     sql = "insert into login(email,password,role,status)values(%s,%s,%s,%s) "
                     val = (email, password, 'Staff', '1')
@@ -469,7 +469,7 @@ def login():
                 cursor.execute("SELECT * FROM login WHERE email=%s", (email,))
                 existing = cursor.fetchone()
                 if existing:
-                    cursor.execute("update login set status=1 where status =0")
+                    cursor.execute("update login set status=1 where email=%s", (email,))
                 else:
                     sql = "insert into login(email,password,role,status)values(%s,%s,%s,%s) "
                     val = (email, password, 'Staff', '1')
@@ -506,7 +506,7 @@ def login():
         cursor.execute("SELECT * FROM student WHERE email=%s AND password=%s", (email, password))
         result=cursor.fetchone()
         if result:
-            cursor.execute("update login set status=1 where status =0")
+            cursor.execute("update login set status=1 where email=%s", (email,))
         else:
             sql = "INSERT INTO login (email, password, role, status) VALUES (%s, %s, %s, %s)"
             val = (email, password, 'Student', '1')
