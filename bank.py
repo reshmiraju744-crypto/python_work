@@ -128,18 +128,8 @@ def trans():
         print("Invalid Choice")
 
 def admin_log():
-    email=input("Enter your Email ID:")
-    passw=input("Enter your password:")
-    cursor.execute("SELECT * FROM admin WHERE email=%s AND password=%s",
-                   (email, passw))
-    result = cursor.fetchone()
-    if cursor.rowcount > 0:
-        print("Logged in successfully.")
-    else:
-        print("No matching record found.")
-
     while 1:
-        print("1.Add worker\n2.Update worker\n3.Delete Worker\n4.View Worker Details\n5.View Holder Details\n6.Exit")
+        print("1.Add worker\n2.Update worker\n3.Delete Worker\n4.View Worker Details\n5.View Holder Details\n6.View transactions\n7.Exit")
         ch=int(input("Enter your choice:"))
         if ch==1:
             insert_worker()
@@ -150,9 +140,18 @@ def admin_log():
         elif ch == 4:
             cursor.execute("select * from worker")
             result = cursor.fetchone()
+            for x in result:
+                print(x)
         elif ch==5:
             cursor.execute("select * from account")
             result = cursor.fetchone()
+            for x in result:
+                print(x)
+        elif ch==6:
+            cursor.execute("select * from transactions")
+            result = cursor.fetchall()
+            for x in result:
+                print(x)
         elif ch==6:
             print("Exiting....")
             break
@@ -160,16 +159,6 @@ def admin_log():
             print("Invalid choice!!")
 
 def manager_log():
-    email = input("Enter your Email ID:")
-    passw = input("Enter your password:")
-    sql="SELECT * FROM worker WHERE email=%s AND password=%s"
-    val=(email, passw)
-    cursor.execute(sql,val)
-    result = cursor.fetchone()
-    if cursor.rowcount > 0:
-        print("Logged in successfully.")
-    else:
-        print("No matching record found.")
     while 1:
         print("1.Add worker\n2.Update worker\n3.Delete Worker\n4.View Worker Details\n5.View Holder Details\n6.Add account\n7.Update account\n8.Delete Account\n9.Exit")
         ch = int(input("Enter your choice:"))
@@ -182,9 +171,13 @@ def manager_log():
         elif ch == 4:
             cursor.execute("select * from worker")
             result = cursor.fetchone()
+            for x in result:
+                print(x)
         elif ch == 5:
             cursor.execute("select * from account")
             result = cursor.fetchone()
+            for x in result:
+                print(x)
         elif ch==6:
             add_acct()
         elif ch==7:
@@ -198,15 +191,6 @@ def manager_log():
             print("Invalid choice!!")
 
 def worker_log():
-    email = input("Enter your Email ID:")
-    passw = input("Enter your password:")
-    cursor.execute("SELECT * FROM worker WHERE email=%s AND password=%s",
-                   (email, passw))
-    result = cursor.fetchone()
-    if cursor.rowcount > 0:
-        print("Logged in successfully.")
-    else:
-        print("No matching record found.")
     while 1:
         print("1.Update\n2.Delete \n3.View Details\n4.Exit")
         ch=int(input("Enter your choice:"))
@@ -217,6 +201,8 @@ def worker_log():
         elif ch == 3:
             cursor.execute("select * from worker where email=%s and passw=%s")
             result = cursor.fetchone()
+            for x in result:
+                print(x)
         elif ch==4:
             print("Exiting....")
         else:
@@ -229,19 +215,94 @@ def acc_holder():
     for x in myresult:
         print(x)
 
+def login():
+    email = input("Enter your Email ID:")
+    passw = input("Enter your password:")
+    user_found = False
+    cursor.execute("SELECT * FROM admin WHERE email=%s AND password=%s",
+                   (email, passw))
+    result=cursor.fetchone()
+    if result:
+        cursor.execute("SELECT * FROM login WHERE email=%s ", (email,))
+        existing=cursor.fetchone()
+        if existing:
+            cursor.execute("update login set status=1 where email=%s", (email,))
+        else:
+            sql="insert into login (email,password,role,status)values(%s,%s,%s,%s)"
+            val=(email,passw,'Admin','1')
+            cursor.execute(sql,val)
+        mydb.commit()
+        print("✅ Logged in successfully as Admin.")
+        admin_log()
+        user_found = True
+
+    elif  not user_found:
+        cursor.execute("SELECT * FROM worker WHERE email=%s AND password=%s",(email, passw))
+        result = cursor.fetchone()
+        if result:
+            cursor.execute("SELECT * FROM login WHERE email=%s", (email,))
+            existing = cursor.fetchone()
+            if existing:
+                cursor.execute("update login set status=1 where email=%s", (email,))
+            else:
+                sql = "insert into login (email,password,role,status)values(%s,%s,%s,%s)"
+                val = (email, passw, 'Manager', '1')
+                cursor.execute(sql, val)
+            mydb.commit()
+            print("✅ Logged in successfully as Manager.")
+            manager_log()
+            user_found = True
+
+    elif not user_found:
+        cursor.execute("SELECT * FROM worker WHERE email=%s AND password=%s",
+                       (email, passw))
+        result = cursor.fetchone()
+        if result:
+            cursor.execute("SELECT * FROM login WHERE email=%s", (email,))
+            existing = cursor.fetchone()
+            if existing:
+                cursor.execute("update login set status=1 where email=%s", (email,))
+            else:
+                sql = "insert into login (email,password,role,status)values(%s,%s,%s,%s)"
+                val = (email, passw, 'Worker', '1')
+                cursor.execute(sql, val)
+            mydb.commit()
+            print("✅ Logged in successfully as Worker.")
+            worker_log()
+            user_found = True
+
+
+def logged_out():
+    sq = "update login set status='0' where status='1'"
+    cursor.execute(sq)
+    mydb.commit()
+    print("Logged out successfully ")
+
+
+def bank():
+    while 1:
+        print("1.Login\n2.Logout\n3.Exit")
+        ch = int(input("Enter your choice:"))
+        if ch == 1:
+            login()
+        elif ch == 2:
+            logged_out()
+            break
+        elif ch == 3:
+            print("Exiting....")
+            break
+        else:
+            print("Invalid choice!!")
+
+
 while 1:
-    print("Login portal!!")
-    print("Do you want to login as \n1.Admin\n2.Manager\n3.worker\n4.Account Holder\n5.Exit")
+    print("1.Employees only\n2.Account_holder\n3.Exit")
     ch = int(input("Enter your choice:"))
     if ch == 1:
-        admin_log()
+       bank()
     elif ch == 2:
-        manager_log()
-    elif ch == 3:
-        worker_log()
-    elif ch==4:
         acc_holder()
-    elif ch == 5:
+    elif ch == 3:
         print("Exiting....")
     else:
         print("Invalid choice!!")
